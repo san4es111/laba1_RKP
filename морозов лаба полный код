@@ -1,0 +1,90 @@
+import math
+import sys
+
+
+MAX_VALUE = 10000
+
+
+def print_help():
+    print("""mathtool — решение уравнений вида A*x^2 + B*x + C = 0
+
+Использование:
+    python mathtool.py                         вывод справки
+    python mathtool.py --help                  вывод справки
+    python mathtool.py solve                   ввод коэффициентов с клавиатуры
+    python mathtool.py solve -a 1 -b -3 -c 2   решение с заданными коэффициентами
+
+Коэффициенты A, B, C — целые числа, по модулю не превышающие 10000.""")
+
+
+def read_coefficients(arguments):
+    if len(arguments) == 1:
+        return input("Введите A: "), input("Введите B: "), input("Введите C: ")
+
+    if len(arguments) == 7:
+        if arguments[1] != "-a" or arguments[3] != "-b" or arguments[5] != "-c":
+            print("ОШИБКА: неизвестный параметр", file=sys.stderr)
+            sys.exit(1)
+        return arguments[2], arguments[4], arguments[6]
+
+    print("ОШИБКА: неверный набор параметров", file=sys.stderr)
+    sys.exit(1)
+
+
+def main():
+    arguments = sys.argv[1:]
+
+    if len(arguments) == 0 or arguments == ["--help"]:
+        print_help()
+        return 0
+
+    if arguments[0] != "solve":
+        print("ОШИБКА: неизвестная команда", file=sys.stderr)
+        return 1
+
+    try:
+        a_text, b_text, c_text = read_coefficients(arguments)
+        a = int(a_text)
+        b = int(b_text)
+        c = int(c_text)
+    except ValueError:
+        print("ОШИБКА: коэффициент не является целым числом", file=sys.stderr)
+        return 1
+
+    if abs(a) > MAX_VALUE or abs(b) > MAX_VALUE or abs(c) > MAX_VALUE:
+        print("ОШИБКА: значение вне допустимого диапазона", file=sys.stderr)
+        return 1
+
+    if a == 0:
+        if b == 0:
+            print(
+                "ОШИБКА: это не уравнение, неизвестное отсутствует",
+                file=sys.stderr,
+            )
+            return 1
+
+        print("Уравнение линейное")
+        x = -c / b
+        print(f"x = {x:.3f}")
+        return 0
+
+    print("Уравнение квадратное")
+    discriminant = b * b - 4 * a * c
+    print(f"D = {discriminant}")
+
+    if discriminant > 0:
+        x1 = (-b + math.sqrt(discriminant)) / (2 * a)
+        x2 = (-b - math.sqrt(discriminant)) / (2 * a)
+        print(f"x1 = {x1:.3f}")
+        print(f"x2 = {x2:.3f}")
+    elif discriminant == 0:
+        x = -b / (2 * a)
+        print(f"x = {x:.3f}")
+    else:
+        print("Действительных корней нет")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
